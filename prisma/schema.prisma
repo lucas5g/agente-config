@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Agent {
+  id           String   @id @default(cuid())
+  name         String
+  description  String?
+  systemPrompt String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tools         AgentTool[]
+  conversations Conversation[]
+}
+
+model Tool {
+  id               String   @id @default(cuid())
+  name             String   @unique
+  description      String
+  method           String
+  url              String
+  encryptedHeaders String?
+  inputSchema      String?
+  responseMapping  String?
+  timeoutMs        Int      @default(10000)
+  enabled          Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  agents           AgentTool[]
+}
+
+model AgentTool {
+  id      String  @id @default(cuid())
+  agentId String
+  toolId  String
+  enabled Boolean @default(true)
+
+  agent   Agent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  tool    Tool  @relation(fields: [toolId], references: [id], onDelete: Cascade)
+
+  @@unique([agentId, toolId])
+}
+
+model Conversation {
+  id        String   @id @default(cuid())
+  agentId   String
+  title     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  agent     Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  messages  Message[]
+}
+
+model Message {
+  id             String   @id @default(cuid())
+  conversationId String
+  role           String
+  content        String
+  partsJson      String?
+  createdAt      DateTime @default(now())
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}
