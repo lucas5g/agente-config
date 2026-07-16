@@ -82,6 +82,13 @@ export async function POST(req: Request) {
           description: dbTool.description,
           inputSchema: parseInputSchema(dbTool.inputSchema),
           execute: async args => {
+            console.log('[tool:call]', {
+              toolName: dbTool.name,
+              method: dbTool.method,
+              urlTemplate: dbTool.url,
+              args,
+            });
+
             const decryptedHeaders = decryptSecret(dbTool.encryptedHeaders);
             const headers = decryptedHeaders ? JSON.parse(decryptedHeaders) : undefined;
             const result = await executeHttpTool({

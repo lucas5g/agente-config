@@ -79,6 +79,10 @@ export function ChatPanel({
     setMessages([]);
   }
 
+  const visibleMessages = messages.filter(message =>
+    message.parts.some(part => part.type === 'text' && part.text.trim()),
+  );
+
   return (
     <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
       <aside className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5">
@@ -94,21 +98,14 @@ export function ChatPanel({
 
       <section className="flex min-h-[70vh] flex-col rounded-2xl border border-slate-800 bg-slate-900/60">
         <div className="flex-1 space-y-4 overflow-auto p-5">
-          {messages.length ? (
-            messages.map(message => (
+          {visibleMessages.length ? (
+            visibleMessages.map(message => (
               <div key={message.id} className={message.role === 'user' ? 'text-right' : 'text-left'}>
                 <div className={`inline-block max-w-[85%] rounded-2xl px-4 py-3 text-sm ${message.role === 'user' ? 'bg-cyan-400 text-slate-950' : 'bg-slate-800 text-slate-100'}`}>
                   <div className="mb-1 text-xs font-semibold uppercase opacity-70">{message.role}</div>
                   {message.parts.map((part, index) => {
                     if (part.type === 'text') {
                       return <MarkdownMessage key={index}>{part.text}</MarkdownMessage>;
-                    }
-                    if (part.type.startsWith('tool-')) {
-                      return (
-                        <pre key={index} className="mt-2 overflow-auto rounded-lg bg-slate-950 p-3 text-left text-xs text-slate-300">
-                          {JSON.stringify(part, null, 2)}
-                        </pre>
-                      );
                     }
                     return null;
                   })}

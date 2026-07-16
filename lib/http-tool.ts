@@ -30,10 +30,14 @@ export async function executeHttpTool(input: ExecuteHttpToolInput) {
     const body = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)
       ? JSON.stringify(input.args)
       : undefined;
+    const parsedUrl = new URL(url);
 
     console.log('[tool:http] request', {
       method,
-      url,
+      urlTemplate: input.url,
+      finalUrl: url,
+      pathname: parsedUrl.pathname,
+      queryParams: Object.fromEntries(parsedUrl.searchParams.entries()),
       args: input.args,
       hasHeaders: Object.keys(headers).length > 0,
       hasBody: Boolean(body),
@@ -54,7 +58,7 @@ export async function executeHttpTool(input: ExecuteHttpToolInput) {
 
     console.log('[tool:http] response', {
       method,
-      url,
+      finalUrl: url,
       status: response.status,
       ok: response.ok,
     });
